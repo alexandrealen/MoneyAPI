@@ -9,30 +9,37 @@ namespace MoneyAPI
 {
     public class Money
     {
-        private string apiKey { get; set; } 
-        public Money(string apiKey)
+        private readonly string apiKey;
+
+        //https://api.currconv.com
+        //https://prepaid.currconv.com
+        //https://free.currconv.com     free one
+        //https://your-custom-subdomain.currconv.com
+        private Uri uri { get; set; }
+        public Money(string uri, string apiKey)
         {
             this.apiKey = apiKey;
+            this.uri = new Uri(uri);
         }
 
         public async Task<string> exchangeCurrencies(string from, string to)
         {
             var client = new HttpClient();
 
-            client.BaseAddress = new Uri("https://free.currconv.com");
+            client.BaseAddress = uri;
 
             var response = await client.GetAsync($"/api/v7/convert?q={from.ToUpper()}_{to.ToUpper()}&compact=ultra&apiKey={apiKey}");
             var stringResult = await response.Content.ReadAsStringAsync();
-            var dictResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(stringResult);
+            var dictResult = JsonConvert.DeserializeObject<KeyValuePair<string, string>>(stringResult);
 
-            return dictResult[$"{from.ToUpper()}_{to.ToUpper()}"];
+            return $"{dictResult.Key.ToUpper()}_{dictResult.Value.ToUpper()}";
         }
 
         public async Task<IEnumerable<ExchangeProperties>> exchangeCurrencies(Dictionary<string, string> from_to)
         {
             var client = new HttpClient();
 
-            client.BaseAddress = new Uri("https://free.currconv.com");
+            client.BaseAddress = uri;
 
             string q = "";
 
@@ -63,7 +70,7 @@ namespace MoneyAPI
         {
             var client = new HttpClient();
 
-            client.BaseAddress = new Uri("https://free.currconv.com");
+            client.BaseAddress = uri;
 
             var response = await client.GetAsync($"/api/v7/currencies?apiKey={apiKey}");
             var stringResult = await response.Content.ReadAsStringAsync();
@@ -84,7 +91,7 @@ namespace MoneyAPI
         {
             var client = new HttpClient();
 
-            client.BaseAddress = new Uri("https://free.currconv.com");
+            client.BaseAddress = uri;
 
             var response = await client.GetAsync($"/api/v7/countries?apiKey={apiKey}");
             var stringResult = await response.Content.ReadAsStringAsync();
