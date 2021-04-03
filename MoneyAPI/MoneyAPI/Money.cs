@@ -9,6 +9,8 @@ namespace MoneyAPI
 {
     public class Money
     {
+        //https://free.currencyconverterapi.com/  free api key
+
         private readonly string apiKey;
 
         //https://api.currconv.com
