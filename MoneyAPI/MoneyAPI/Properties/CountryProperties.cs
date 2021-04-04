@@ -3,12 +3,12 @@ namespace MoneyAPI.Properties
 {
     public class CountryProperties
     {
-        public string alpha3 { get; private set; }
-        public string currencyId { get; private set; }
-        public string currencyName { get; private set; }
-        public string currencySymbol { get; private set; }
-        public string id { get; private set; }
-        public string name { get; private set; }
+        public string Alpha3 { get; }
+        public string CurrencyId { get; }
+        public string CurrencyName { get; }
+        public string CurrencySymbol { get; }
+        public string Id { get; }
+        public string Name { get; }
 
         public CountryProperties(string alpha3 = null,
                                  string currencyId = null, 
@@ -17,12 +17,12 @@ namespace MoneyAPI.Properties
                                  string id = null,
                                  string name = null)
         {
-            this.alpha3 = alpha3;
-            this.currencyId = currencyId;
-            this.currencyName = currencyName;
-            this.currencySymbol = currencySymbol;
-            this.id = id;
-            this.name = name;
+            this.Alpha3 = alpha3;
+            this.CurrencyId = currencyId;
+            this.CurrencyName = currencyName;
+            this.CurrencySymbol = currencySymbol;
+            this.Id = id;
+            this.Name = name;
         }
     }
 }

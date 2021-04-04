@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using MoneyAPI.Properties;
+using System.Linq;
 
 namespace MoneyAPI
 {
@@ -30,42 +31,48 @@ namespace MoneyAPI
 
             client.BaseAddress = uri;
 
-            var response = await client.GetAsync($"/api/v7/convert?q={from.ToUpper()}_{to.ToUpper()}&compact=ultra&apiKey={apiKey}");
-            var stringResult = await response.Content.ReadAsStringAsync();
-            var dictResult = JsonConvert.DeserializeObject<KeyValuePair<string, string>>(stringResult);
-
-            return $"{dictResult.Key.ToUpper()}_{dictResult.Value.ToUpper()}";
+            try
+            {
+                var response = await client.GetAsync($"/api/v7/convert?q={from.ToUpper()}_{to.ToUpper()}&compact=ultra&apiKey={apiKey}");
+                var stringResult = await response.Content.ReadAsStringAsync();
+                var dictResult = JsonConvert.DeserializeObject<KeyValuePair<string, string>>(stringResult);
+                return $"{dictResult.Key.ToUpper()}_{dictResult.Value.ToUpper()}";
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
         }
 
         public async Task<IEnumerable<ExchangeProperties>> exchangeCurrencies(Dictionary<string, string> from_to)
         {
             var client = new HttpClient();
-
             client.BaseAddress = uri;
 
-            string q = "";
+            var q = string.Join(",", from_to.Select(x => $"{x.Key}_{x.Value}"));
 
-            foreach(var fromTo in from_to)
+            try
             {
-                if(q != "")
+
+                var response = await client.GetAsync($"/api/v7/convert?q={q}&compact=ultra&apiKey={apiKey}");
+                var stringResult = await response.Content.ReadAsStringAsync();
+                var dictResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(stringResult);
+
+                var result = new List<ExchangeProperties>();
+
+                foreach (var exchange in dictResult)
                 {
-                    q += ",";
+                    result.Add(new ExchangeProperties(exchange.Key, exchange.Value));
                 }
-                q += $"{fromTo.Key}_{fromTo.Value}";
+
+                return result;
             }
-
-            var response = await client.GetAsync($"/api/v7/convert?q={q}&compact=ultra&apiKey={apiKey}");
-            var stringResult = await response.Content.ReadAsStringAsync();
-            var dictResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(stringResult);
-
-            var result = new List<ExchangeProperties>();
-
-            foreach(var exchange in dictResult)
+            catch (Exception e)
             {
-                result.Add(new ExchangeProperties(exchange.Key, exchange.Value));
+                var x = new List<ExchangeProperties>();
+                x.Add(new ExchangeProperties(e.Message, e.HelpLink));
+                return x;
             }
-
-            return result;
         }
 
         public async Task<IEnumerable<CurrencyProperties>> getAllCurrencies()
@@ -74,19 +81,29 @@ namespace MoneyAPI
 
             client.BaseAddress = uri;
 
-            var response = await client.GetAsync($"/api/v7/currencies?apiKey={apiKey}");
-            var stringResult = await response.Content.ReadAsStringAsync();
-            var dictResult = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, CurrencyProperties>>>(stringResult);
-
-            var resultList = new List<CurrencyProperties>();
-
-            foreach (var currency in dictResult["results"])
+            try
             {
-                resultList.Add(new CurrencyProperties(currency.Value.currencyName,
-                                                      currency.Value.id,
-                                                      currency.Value.currencySymbol));
+                var response = await client.GetAsync($"/api/v7/currencies?apiKey={apiKey}");
+                var stringResult = await response.Content.ReadAsStringAsync();
+                var dictResult = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, CurrencyProperties>>>(stringResult);
+
+                var resultList = new List<CurrencyProperties>();
+
+                foreach (var currency in dictResult["results"])
+                {
+                    resultList.Add(new CurrencyProperties(currency.Value.CurrencyName,
+                                                          currency.Value.Id,
+                                                          currency.Value.CurrencySymbol));
+                }
+                return resultList;
             }
-            return resultList;
+            catch (Exception e)
+            {
+                var x = new List<CurrencyProperties>();
+                x.Add(new CurrencyProperties(e.Message, e.HelpLink));
+                return x;
+            }
+
         }
 
         public async Task<IEnumerable<CountryProperties>> getAllCountries()
@@ -95,23 +112,32 @@ namespace MoneyAPI
 
             client.BaseAddress = uri;
 
-            var response = await client.GetAsync($"/api/v7/countries?apiKey={apiKey}");
-            var stringResult = await response.Content.ReadAsStringAsync();
-            var dictResult = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, CountryProperties>>>(stringResult);
-
-            var resultList = new List<CountryProperties>();
-
-            foreach(var country in dictResult["results"])
+            try
             {
-                resultList.Add(new CountryProperties(country.Value.alpha3, 
-                                                     country.Value.currencyId,
-                                                     country.Value.currencyName,
-                                                     country.Value.currencySymbol,
-                                                     country.Value.id,
-                                                     country.Value.name));
-            }
+                var response = await client.GetAsync($"/api/v7/countries?apiKey={apiKey}");
+                var stringResult = await response.Content.ReadAsStringAsync();
+                var dictResult = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, CountryProperties>>>(stringResult);
 
-            return resultList;
+                var resultList = new List<CountryProperties>();
+
+                foreach (var country in dictResult["results"])
+                {
+                    resultList.Add(new CountryProperties(country.Value.Alpha3,
+                                                         country.Value.CurrencyId,
+                                                         country.Value.CurrencyName,
+                                                         country.Value.CurrencySymbol,
+                                                         country.Value.Id,
+                                                         country.Value.Name));
+                }
+
+                return resultList;
+            }
+            catch (Exception e)
+            {
+                var x = new List<CountryProperties>();
+                x.Add(new CountryProperties(e.Message, e.HelpLink));
+                return x;
+            }
         }
     }
 }
