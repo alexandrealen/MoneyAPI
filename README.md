@@ -51,7 +51,7 @@ Here you can an Enumerable of all countries and it's properties
 
 ```csharp
 var money = new Money(apiKey, Uri);
-var currencies = money.getAllCountries();
+var countries = money.getAllCountries();
 ```
 
 
