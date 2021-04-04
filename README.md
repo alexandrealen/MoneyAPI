@@ -9,7 +9,7 @@ This is a dll, so you'll need to clone the repository, build-it and add this dll
 var money = new Money(apiKey, Uri);
 ```
 
-That's the base. This api was based on (currency converter)[https://www.currencyconverterapi.com/]. So you can get your appropriate apiKey/Uri there.
+That's the base. This api was based on [currency converter](https://www.currencyconverterapi.com/). So you can get your appropriate apiKey/Uri there.
 
 #### Getting exchange between currencies
 
